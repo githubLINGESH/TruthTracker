@@ -283,20 +283,34 @@
                 background-color: #171010;
             }
             }
+
+                <style>
+        /* Style for uploaded image */
+        #uploaded-image {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Style for image panel */
+        #image-panel {
+            margin-top: 20px;
+        }
+    </style>
+
     </style>
 </head>
 
 <body>
     <header>
         <div class="header-container">
-            <h1 style="margin-right:50px;">TruthTracker</h1>
+            <a href="/" ><h1 style="margin-right:50px;">TruthTracker</h1></a>
             <nav>
                 <ul>
                     <div class="dropdown">
                         <a href="#" class="dropbtn" style="font-size: 15px; margin-right: 30px;">Tools</a>
                         <div class="dropdown-content">
                             <a href="/fake_v" style="font-size: 15px;">Fake Video Detection</a>
-                            <a href="/image" style="font-size: 15px;">Fake image Detection</a>
+                            <a href="/streamlit" style="font-size: 15px;">Fake image Detection</a>
                             <a href="/audio" style="font-size: 15px;">Fake audio Detection</a>
                             <a href="/news" style="font-size: 15px;">Fakenews Detection</a>
                             <a href="/realcam"style="font-size: 15px;">Realcam Detection</a>
@@ -317,36 +331,68 @@
             </nav>
         </div>
     </header>
-    <iframe id="streamlit-frame" src="http://localhost:8501" width="100%" height="1000" frameborder="0"></iframe>
-    <main>
-        <div class="image-panel" id="image-panel" style="display: none;">
-            <img class="uploaded-image" id="uploaded-image" alt="Uploaded Image">
-            <div class="image-details" id="image-details"></div>
-        </div>
-        <div>
-            <div id="profile-popup" class="popup-profile">
-                <span class="close-button" onclick="closePopup()">&times;</span>
-                <span id="user-name" class="profile-name">{{ user_name }}</span>
-                <div class="profile-buttons">
-                    <a href="/dashboard"><button class="profile-button">Dashboard</button></a>
-                    <a href="/logout"><button class="profile-button">Logout</button></a>
-                </div>
-            </div>
-    </main>
-        <script>
-            const streamlitFrame = document.getElementById('streamlit-frame');
-            const streamlitWindow = streamlitFrame.contentWindow;
-            
-            // Example: Send a message to the Streamlit app
-            streamlitWindow.postMessage('Hello from HTML!', 'http://localhost:8501');
-            
-            // Example: Listen for messages from the Streamlit app
-            window.addEventListener('message', function(event) {
-                // Handle messages from the Streamlit app
-                const data = event.data;
-                // Do something with the data from Streamlit
+    <input type="file" id="image-upload" accept="image/*">
+    <button id="vision-api-button" data-id="vision-api" onclick="submitImage(this.id)">Vision API</button>
+    <button id="normal-button" data-id="normal" onclick="submitImage(this.id)">Normal</button>
+
+    <div id="image-panel" style="display: none;">
+        <img id="uploaded-image" alt="Uploaded Image">
+        <div id="image-details"></div>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('image-upload');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const imagePanel = document.getElementById('image-panel');
+
+        let selectedOption = null;
+
+        imageUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                uploadedImage.src = e.target.result;
+                imagePanel.style.display = 'block';
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+        function submitImage(id) {
+            selectedOption = document.getElementById(id).getAttribute('data-id');
+            console.log('Selected option:', selectedOption);
+
+            if (!selectedOption) {
+                console.error('No option selected.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', imageUpload.files[0]);
+            formData.append('selectedOption', selectedOption);
+
+            fetch('/image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Render the result
+                const resultDiv = document.getElementById('image-details');
+                resultDiv.innerHTML = `
+                    <p>Human Presence: ${data[0]}</p>
+                    <p>Classification: ${data[1]}</p>
+                    <p>Comment: ${data[2]}</p>
+                    <p>Image Description: ${data[3]}</p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
-        </script>
+        }
+    </script>
+
     <script>
         function openPopup() {
             var popup = document.getElementById('profile-popup');

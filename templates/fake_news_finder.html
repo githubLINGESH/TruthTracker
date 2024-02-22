@@ -132,6 +132,7 @@
             margin-bottom: 180px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+            z-index:1;
         }
 
         .input-panel h1,
@@ -259,20 +260,41 @@
                 cursor: pointer;
                 color: #fff;
             }
+
+            .container{
+                margin-top:0px;
+                display: flex;
+                width: 100%;
+                height: auto;
+                align-items: center;
+            }
+            .video {
+                transform: scale(3.5);
+                flex: 1;
+                margin-left: 390px;
+                margin-top:-70px;
+                padding:0px;
+                min-width:245px;
+                z-index:0;
+                border-radius: 40px;
+            }
+            .video video::-webkit-media-controls {
+                display: none !important;
+            }
         
     </style>
 </head>
 <body>
     <header>
         <div class="header-container">
-            <h1 style="margin-right:50px;margin-top:0px;">Fake News Finder</h1>
+            <a href="/" ><h1 style="margin-right:50px;margin-top:0px;">TruthTracker</h1></a>
             <nav>
                 <ul style="justify-content:space-between;margin-top:0px;">
                     <div class="dropdown">
                         <a href="#" class="dropbtn" style="font-size: 15px; margin-right: 30px;">Tools</a>
                         <div class="dropdown-content">
                             <a href="/fake_v" style="font-size: 15px;">Fake Video Detection</a>
-                            <a href="/image" style="font-size: 15px;">Fake image Detection</a>
+                            <a href="/streamlit" style="font-size: 15px;">Fake image Detection</a>
                             <a href="/audio" style="font-size: 15px;">Fake audio Detection</a>
                             <a href="/news" style="font-size: 15px;">Fakenews Detection</a>
                             <a href="/realcam"style="font-size: 15px;">Realcam Detection</a>
@@ -302,6 +324,13 @@
     </div>
 
     <main>
+        <div class="container">
+            <div class="video">
+                <video controls width="50%" autoplay loop muted>
+                    <source src="{{ url_for('ytgiphy', filename='video.mp4') }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
         <div class="input-panel">
             <h1>Fake News Profile Finder</h1>
             <form method="POST" action="/fake_news_finder">
@@ -333,17 +362,18 @@
                 <button type="submit" style="font-size: 38px">Detect</button>
             </form>
         </div>
+    </div>
 
-        {% if videos %}
+            {% if videos %}
             <div class="results-panel">
                 <h2>Videos:</h2>
                 {% for video in videos %}
-                    <h3>{{ video.video_title }}</h3>
-                    <p>Video ID: {{ video.video_id }}</p>
-                    <p>Channel Title: {{ video.channel_title }}</p>
-                    <p>Published At: {{ video.published_at }}</p>
-                    <p>View Count: {{ video.view_count }}</p>
-                    <p>Like Count: {{ video.like_count }}</p>
+                    <h3>{{ video['video_title'] }}</h3>
+                    <p>Video ID: {{ video['video_id'] }}</p>
+                    <p>Channel Title: {{ video['channel_title'] }}</p>
+                    <p>Published At: {{ video['published_at'] }}</p>
+                    <p>View Count: {{ video['view_count'] }}</p>
+                    <p>Like Count: {{ video['like_count'] }}</p>
                 {% endfor %}
             </div>
         {% endif %}
@@ -357,10 +387,22 @@
             </div>
         {% endif %}
 
-        {% if response %}
+        {% if conclusion_sentiment %}
             <div class="results-panel">
                 <h2>Conclusion:</h2>
-                <p>{{ response }}</p>
+                <p>Sentiment: {{ conclusion_sentiment }}</p>
+                <p>Average Views: {{ average_views }}</p>
+                <p>Average Likes: {{ average_likes }}</p>
+                <h3>Common Themes:</h3>
+                <ul>
+                    {% for theme in common_themes %}
+                        <li>{{ theme }}</li>
+                    {% endfor %}
+                </ul>
+                <h3>Comparison with Reliable Sources:</h3>
+                <p>{{ comparison_result }}</p>
+                <h3>Trend Analysis:</h3>
+                <p>{{ trend_analysis }}</p>
             </div>
         {% endif %}
     </main>

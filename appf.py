@@ -1,5 +1,4 @@
 import subprocess
-import html
 import cv2
 import os
 import imageio
@@ -12,25 +11,35 @@ from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.applications import VGG16
+from tensorflow.keras.models import load_model
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import Counter
 from pytube import YouTube
 from keras.preprocessing import image
 from classifiers import Meso4
-from transformers import AutoTokenizer, TFAutoModelForCausalLM
 from werkzeug.utils import secure_filename
 from transformers import BertTokenizer, BertForSequenceClassification, pipeline
 import newspaper
 from transformers import T5ForConditionalGeneration, T5Tokenizer
-
+from google.cloud import vision
+from google.cloud.vision_v1 import types
+import io
+from scipy.fft import dct
 from pymongo import MongoClient
 from finalaudiocode.audiofinal import main
+import tensorflow as tf
+from youtube import get_youtube_details
+
+
 
 
 app = Flask(__name__)
 
 app.static_folder = 'templates'
 app.secret_key = 'HKGKJWBEIY%#^@VEHJWV'
+
+face_net = cv2.dnn.readNetFromCaffe("pythonProject/deploy.prototxt", "pythonProject/res10_300x300_ssd_iter_140000.caffemodel")
+spoof_detection_model = tf.keras.models.load_model('pythonProject/mymodel.hdf5')
 
 # Configure MongoDB connection
 mongo_uri = "mongodb+srv://webuild:zDEvvvSPzT7ZcUNE@contruction.y5uhaai.mongodb.net/"
@@ -183,6 +192,7 @@ def uploadnews():
         predicted_label = request.form.get('predicted_label')
         is_fake = request.form.get('is_fake')
         explanation = request.form.get('explanation')
+    
 
         document = {
             'news_text': news_text,
@@ -193,10 +203,10 @@ def uploadnews():
             'explanation': explanation
         }
 
-        # Insert the document into the MongoDB collection
+        # Insert the document into the MongoDB colleccction
         collection.insert_one(document)
 
-        return render_template('news.html', news_text=news_text, label=label, confidence=confidence, predicted_label=predicted_label, is_fake=is_fake, explanation=explanation)
+        return render_template('news.html')
 
 
 @app.route('/audio', methods=['GET', 'POST'])
@@ -217,9 +227,130 @@ def audio():
 
     return render_template('audio.html', classification_result=None, transcribed_text=None)
 
-@app.route('/image')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'fakeimage/vision-414807-5c7c9e0314a6.json'
+
+# Load the TensorFlow models
+model_human_classifier = load_model('fakeimage/human_classifier_model_with_vgg16.h5')
+model_fake_detector = load_model('fakeimage/fake_image_classifier_model.h5')
+
+# Initialize the Google Cloud Vision client
+client = vision.ImageAnnotatorClient()
+
+
+# Function to preprocess the image for TensorFlow model
+def preprocess_image_tf(img_path):
+    img = image.load_img(img_path, target_size=(150, 150))
+    img_array = image.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)  # Create a batch
+    img_array /= 255.0  # Rescale pixel values
+    return img_array
+
+
+# Function to preprocess the image for Vision API
+def preprocess_image_vision(image_path):
+    with io.open(image_path, 'rb') as image_file:
+        content = image_file.read()
+
+    # Create an image object
+    image = types.Image(content=content)
+    return image
+
+
+# Function to classify image using TensorFlow model
+def classify_image_tf(img_array):
+    prediction = model_human_classifier.predict(img_array)
+    return "Human" if prediction >= 0 else "Non-human"
+
+
+# Function to classify image using Vision API
+def classify_image_vision(image):
+    # Perform label detection on the image
+    response = client.label_detection(image=image)
+    labels = response.label_annotations
+
+    # Extract label descriptions
+    label_descriptions = [label.description.lower() for label in labels]
+
+    # Determine if the image is human or not
+    human_presence = "Human" if "person" in label_descriptions else "Not Human"
+
+    if human_presence == "Human":
+        # Perform face detection
+        face_response = client.face_detection(image=image)
+        faces = face_response.face_annotations
+        if faces:
+            # If faces are detected, classify if it's real or fake
+            classification = "Real"  # Dummy implementation
+            comment = "This image contains a person."
+        else:
+            classification = "Fake"  # Dummy implementation
+            comment = "This image contains a person but it appears to be fake."
+    else:
+        # If not human, check if the image is edited or not
+        safe_search_response = client.safe_search_detection(image=image)
+        safe_search_annotations = safe_search_response.safe_search_annotation
+        violence_likelihood = safe_search_annotations.violence
+        is_edited = violence_likelihood in [types.Likelihood.LIKELY, types.Likelihood.VERY_LIKELY]
+        if is_edited:
+            classification = "Edited"
+            comment = "This image does not contain a person but it appears to be edited."
+        else:
+            classification = "Not Edited"
+            comment = "This image does not contain a person and it does not appear to be edited."
+
+    # Perform image description
+    response = client.image_properties(image=image)
+    props = response.image_properties_annotation
+    description = ""
+    for prop in props.dominant_colors.colors:
+        color = "(R:{}, G:{}, B:{})".format(round(prop.color.red), round(prop.color.green), round(prop.color.blue))
+        description += str(round(prop.pixel_fraction * 100, 2)) + "% " + color + ", "
+
+    return human_presence, classification, comment, description
+
+
+# Route to handle image submission
+@app.route('/submit-image', methods=['POST'])
+def submit_image():
+    # Get the selected option from the request
+    selected_option = request.form['selectedOption']
+
+    # Get the uploaded image file
+    uploaded_image = request.files['image']
+
+    # Save the uploaded image to a temporary file
+    temp_image_path = 'temp_image.jpg'
+    uploaded_image.save(temp_image_path)
+
+    # Process the image based on the selected option
+    if selected_option == 'vision-api':
+        image_data = preprocess_image_vision(temp_image_path)
+        result = classify_image_vision(image_data)
+    elif selected_option == 'normal':
+        img_array = preprocess_image_tf(temp_image_path)
+        result = classify_image_tf(img_array)
+    else:
+        result = "Invalid option selected."
+
+    # Delete the temporary image file
+    os.remove(temp_image_path)
+
+    # Return the result
+    return jsonify(result)
+
+
+# Route to render the image upload page
+@app.route('/image', methods=['GET', 'POST'])
 def image():
-    return render_template('image.html')
+    if request.method == 'POST':
+        # If it's a POST request, submit the image
+        return submit_image()
+    else:
+        # If it's a GET request, render the image upload page
+        return render_template('image.html')
+
+
+
 
 @app.route('/streamlit')
 def streamlit():
@@ -228,6 +359,22 @@ def streamlit():
 
 @app.route('/videos/<path:filename>')
 def download_file(filename):
+    return send_from_directory(app.static_folder, filename)
+
+@app.route('/videos/<path:filename>')
+def download_vid(filename):
+    return send_from_directory(app.static_folder, filename)
+
+@app.route('/videos/<path:filename>')
+def newsvideo(filename):
+    return send_from_directory(app.static_folder, filename)
+
+@app.route('/videos/<path:filename>')
+def audiogiphy(filename):
+    return send_from_directory(app.static_folder, filename)
+
+@app.route('/videos/<path:filename>')
+def ytgiphy(filename):
     return send_from_directory(app.static_folder, filename)
 
 
@@ -256,9 +403,40 @@ def get_image5():
     image_directory = 'images'
     return send_file(f'{image_directory}/realcam.jpg')
 
+@app.route('/workflow/image1')
+def get_image():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/image.png')
+
+@app.route('/workflow/image2')
+def get_audio():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/a.jpg')
+
+@app.route('/workflow/image3')
+def get_video():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/v.png')
+
+@app.route('/workflow/image4')
+def get_news():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/news.png')
+
+@app.route('/workflow/image5')
+def get_realcam():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/realcam.png')
+
+@app.route('/workflow/image6')
+def get_yt():
+    image_directory = 'workflow'
+    return send_file(f'{image_directory}/youtube.png')
+
 @app.route('/report')
 def report():
     return render_template('report.html')
+
 
 # Route for the fake_news_finder page
 @app.route('/fake_news_finder', methods=['GET', 'POST'])
@@ -268,73 +446,17 @@ def fake_news_finder():
         keyword = request.form['keyword']
         rate_limit = int(request.form['rate_limit'])
         
-        api_key = "AIzaSyBPHs1Pq49RrKiW1BIFl2uJHYrwa7cpeyY"
-        youtube = build('youtube', 'v3', developerKey=api_key)
+        # Call get_youtube_details() to fetch YouTube data and perform analysis
+        videos, comments, sentiment_scores, common_themes, comparison_result, trend_analysis = get_youtube_details(keyword, rate_limit)
         
-        model_name = "gpt2"
-        model = TFAutoModelForCausalLM.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        
-        # Search YouTube for videos with the keyword
-        search_response = youtube.search().list(
-            part="snippet",
-            q=keyword,
-            type="video",
-            maxResults=rate_limit
-        ).execute()
+        # Render the template with the fetched data
+        return render_template('fake_news_finder.html', videos=videos, comments=comments, 
+                               sentiment_scores=sentiment_scores, common_themes=common_themes, 
+                               comparison_result=comparison_result, trend_analysis=trend_analysis)
 
-        videos = []
-        for item in search_response["items"]:
-            video_title = item["snippet"]["title"]
-            video_id = item["id"]["videoId"]
-            channel_title = item["snippet"]["channelTitle"]
-            published_at = item["snippet"]["publishedAt"]
-
-            # Retrieve video details
-            video_response = youtube.videos().list(
-                part="statistics",
-                id=video_id
-            ).execute()
-
-            view_count = video_response["items"][0]["statistics"].get("viewCount", 0)
-            like_count = video_response["items"][0]["statistics"].get("likeCount", 0)
-
-            videos.append({
-                'video_title': video_title,
-                'video_id': video_id,
-                'channel_title': channel_title,
-                'published_at': published_at,
-                'view_count': view_count,
-                'like_count': like_count
-            })
-
-        # Retrieve keyword-related comments
-        comments = []
-        for video in videos:
-            video_id = video['video_id']
-            comment_response = youtube.commentThreads().list(
-                part="snippet",
-                videoId=video_id,
-                searchTerms=keyword,
-                maxResults=rate_limit
-            ).execute()
-
-            if "items" in comment_response:
-                for comment in comment_response["items"]:
-                    comment_text = comment["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
-                    comment_text = html.unescape(comment_text)
-                    comments.append(comment_text)
-
-        prompt = f"Is it true that {keyword}?"
-        inputs = tokenizer.encode(prompt, return_tensors="tf", add_special_tokens=True)
-
-        # Generate response from GPT-2 model
-        output = model.generate(inputs, max_length=50, do_sample=True, top_k=50, top_p=0.95, pad_token_id=tokenizer.eos_token_id)
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
-
-        return render_template('fake_news_finder.html', videos=videos, comments=comments, response=response)
-
-    return render_template('fake_news_finder.html', videos=None, comments=None, response=None)
+    return render_template('fake_news_finder.html', videos=None, comments=None, 
+                           sentiment_scores=None, common_themes=None, 
+                           comparison_result=None, trend_analysis=None)
 
 
 # Route for the fake_video_detector page
@@ -698,12 +820,64 @@ def report_user():
             file.write(report_user + '\n')
 
         return "Report submitted successfully."
+
     
 @app.route('/realcam', methods=['GET','POST'])
 def real_cam():
     if request.method == 'POST':
-    
-        return render_template('realcam.com')
+        
+        frame_blob = request.files['frame'].read()
+        nparr = np.frombuffer(frame_blob, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+
+        # Set a minimum confidence threshold for face detection
+        confidence_threshold = 0.5
+        
+        results=[]
+        
+        # Perform face detection
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104, 117, 123))
+        face_net.setInput(blob)
+        
+        try:
+            detections = face_net.forward()
+
+            # Process each detected face
+            for i in range(detections.shape[2]):
+                    confidence = detections[0, 0, i, 2]
+
+                    # Filter out weak detections
+                    if confidence > confidence_threshold:
+                        # Extract the face region
+                        box = detections[0, 0, i, 3:7] * np.array([frame.shape[1], frame.shape[0], frame.shape[1], frame.shape[0]])
+                        (startX, startY, endX, endY) = box.astype(int)
+                        face = frame[startY:endY, startX:endX]
+                        
+                        # Determine label and color based on confidence
+                        if confidence > 0.90:
+                            label = "Real"
+                            color = "green"
+                        else:
+                            label = "Spoof"
+                            color = "red"
+                            
+
+            cv2.destroyAllWindows()
+
+            results.append({
+                        "startX": int(startX),
+                        "startY": int(startY),
+                        "endX": int(endX),
+                        "endY": int(endY),
+                        "label": label,
+                        "color": color
+                    })
+
+            return jsonify(results=results)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return jsonify(error=str(e))
 
     return render_template('realcam.html')
 

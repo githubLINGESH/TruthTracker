@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>TruthTracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
@@ -191,6 +191,36 @@
             color: #fff;
         }
 
+        .container img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin:60px;
+            margin-left:200px;
+        }
+
+        .container img:hover {
+            transform: scale(1.05);
+        }
+
+        .container {
+            margin: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
+        .container h4 {
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            margin:20px;
+        }
+        
         .curved-box {
             background-color: #232323;
             border-radius: 40px;
@@ -202,7 +232,7 @@
             &:hover {
                 background-color: #171010;
             }
-            }
+        }
     </style>
 </head>
 <body>
@@ -244,37 +274,46 @@
                 <a href="/logout"><button class="profile-button">Logout</button></a>
             </div>
         </div>
-        <h1>How Fake Video and Fake News Detection Works</h1>
-        <p>
-            Our fake video and fake news detection system is designed to help you identify and distinguish between real and manipulated content. Here's how it works:
-        </p>
-        <ol>
-            <li>Upload Video URL or MP4 File: Use the provided input fields to either provide the URL of the video you want to analyze or upload the MP4 file directly.</li>
-            <li>Analyze the Content: Click on the "Detect" button to initiate the analysis process.</li>
-            <li>Processing and Analysis: Our system will process the video or news content using advanced algorithms and techniques to identify any signs of manipulation or falsehood.</li>
-            <li>Results and Verification: Once the analysis is complete, the system will provide you with the results. It will indicate whether the video or news content is likely to be genuine or if there are indications of manipulation or misinformation.</li>
-            <li>Make Informed Decisions: Based on the results, you can use the information to make informed decisions about the authenticity and trustworthiness of the content.</li>
-        </ol>
-        <p font-weight: bold>Note: </p>
-        <p>
-            It's important to note that while our system employs state-of-the-art techniques, it may not be 100% foolproof. It's always recommended to exercise critical thinking and verify the information from multiple reliable sources before drawing conclusions.
-        </p>
+        <div class="container">
+            <img src="{{ url_for('get_image') }}" alt="Image" class="img-fluid">
+            <h4>Image</h4>
+        </div>
+        <div class="container">
+            <img src="{{ url_for('get_audio') }}" alt="Audio" class="img-fluid">
+            <h4>Audio</h4>
+        </div>
+        <div class="container">
+            <img src="{{ url_for('get_video') }}" alt="Video" class="img-fluid">
+            <h4>Video</h4>
+        </div>
+        <div class="container">
+            <img src="{{ url_for('get_news') }}" alt="News" class="img-fluid">
+            <h4>News</h4>
+        </div>
+        <div class="container">
+            <img src="{{ url_for('get_realcam') }}" alt="Real Cam" class="img-fluid">
+            <h4>Real Cam</h4>
+        </div>
+        <div class="container">
+            <img src="{{ url_for('get_yt') }}" alt="YouTube" class="img-fluid">
+            <h4>YouTube</h4>
+        </div>
     </main>
+    <script>
+        function openPopup() {
+            var popup = document.getElementById('profile-popup');
+            popup.style.display = 'block';
+
+            var profileNamePlaceholder = document.getElementById("user-name");
+            if (profileNamePlaceholder) {
+                profileNamePlaceholder.textContent = userName;
+            }
+        }
+
+        function closePopup() {
+            var popup = document.getElementById('profile-popup');
+            popup.style.display = 'none';
+        }
+    </script>
 </body>
-<script>
-    function openPopup() {
-        var popup = document.getElementById('profile-popup');
-        popup.style.display = 'block';
-
-        var profileNamePlaceholder = document.getElementById("user-name");
-        if (profileNamePlaceholder) {
-            profileNamePlaceholder.textContent = userName;
-    }
-}
-
-    function closePopup() {
-        var popup = document.getElementById('profile-popup');
-        popup.style.display = 'none';
-    }
-</script>
 </html>
