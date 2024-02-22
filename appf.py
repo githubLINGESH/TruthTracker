@@ -815,7 +815,6 @@ def report_user():
         # Get the submitted report user
         report_user = request.form.get('reportUser')
 
-        # Save the report user to a file (you can use any format you prefer)
         with open('report_users.txt', 'a') as file:
             file.write(report_user + '\n')
 
@@ -831,7 +830,6 @@ def real_cam():
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
 
-        # Set a minimum confidence threshold for face detection
         confidence_threshold = 0.5
         
         results=[]

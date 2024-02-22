@@ -413,7 +413,7 @@
 
                     var formData = new FormData();
                     formData.append('audio-file', file);
-                    fetch('/fake_audio_detector', { // Change endpoint URL to match your server
+                    fetch('/fake_audio_detector', {
                             method: 'POST',
                             body: formData
                         })

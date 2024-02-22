@@ -11,7 +11,7 @@ model_human_classifier = load_model('human_classifier_model_with_vgg16.h5')
 model_fake_detector = load_model('fake_image_classifier_model.h5')
 
 
-# Function to preprocess the image
+
 def preprocess_image(img_path):
     img = image.load_img(img_path, target_size=(150, 150))
     img_array = image.img_to_array(img)

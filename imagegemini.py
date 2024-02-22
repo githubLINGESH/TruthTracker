@@ -36,7 +36,7 @@ model = genai.GenerativeModel(model_name="gemini-pro-vision",
                               generation_config=generation_config,
                               safety_settings=safety_settings)
 
-# Validate that an image is present
+
 if not (img := Path("image0.jpeg")).exists():
   raise FileNotFoundError(f"Could not find image: {img}")
 

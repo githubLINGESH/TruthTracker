@@ -5,7 +5,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 
-# Define the paths for REAL and FAKE folders
+
 REAL_FOLDER = 'REAL'
 FAKE_FOLDER = 'FAKE'
 

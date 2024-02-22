@@ -4,7 +4,6 @@ import librosa
 from keras.models import load_model
 import os
 
-# Load the model
 def load_model_fn(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(current_dir, filename)
