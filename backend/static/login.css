@@ -1,0 +1,115 @@
+*{
+    font-family: "Lato", sans-serif;
+    text-transform: uppercase;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: black;
+}
+
+header {
+    background-color: black;
+    padding: 40px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.login-container {
+    margin-top:-200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 120vh;
+    width:100%;
+}
+
+.login-container form {
+    width: 200%;
+    height: 300px;
+    background-color: rgba(255,255,255,0.2);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 255);
+    text-align: center;
+    margin:30px;
+}
+
+.login-container form input {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 80%;
+    border: none;
+    background: #000;
+    color: #ffffff;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.login-container form input:hover {
+    background: grey;
+}
+
+.login-container form input::placeholder {
+    color: white;
+    font-size: 12px;
+    padding:5px;
+}
+
+.login-container form input:hover::placeholder {
+    color: white;
+}
+
+.login-container form button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    border: none;
+    background: #fff;
+    color: #000;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-container h2{
+    color:white;
+    font-weight: bold;
+}
+
+.login-container form button:hover {
+    background: #000;
+    color:#fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 255);
+}
+
+.signup-link p {
+    color: #fff;
+    margin-top: 10px;
+}
+a {
+    text-decoration: blink;
+    color: inherit;
+    font-weight:1000;
+}

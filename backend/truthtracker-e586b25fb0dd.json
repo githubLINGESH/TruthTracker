@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "truthtracker",
+  "private_key_id": "e586b25fb0dd06e0ff106f13f04675cc8ceed20c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCoCjeyDt2yPlgD\nrlY7bgnAd14LwAMMYUWqvJz6HdZEPmyccKpTbtgqm/j1vvwp5QIYn4bP8imPHOrR\nob8/HKVoJmNuZDcwEIbWBEP9uUrESvYJHfIQ/OK7eun4Eh7ekSCiP/fSwEjqMjux\n3fbXx9jhn4ERgBhjMS5QQd7H7IRiPJJ721ykdLhF9FDJoKtRVl7icnHjNmUhBxU+\nsXpX8YOoSrp3aaRcNEO7C9gq3J0fPhAJSTMLI4cVps1PgWtfHYNewVgKGfBUDW3V\ndb6//EofKeN5Ip1NlBmuWVIP79Q0B73ktsKqcApyYnLlrfiRupWpI1F0C78we4gQ\ntmEY+/IHAgMBAAECggEADv6aabEZ50XY5LsxxqvTAvGj2riPjRNA/DNIbqkq7XwE\nhREooblKYML6PDOGnNZqkXfqt7OMMdEKwxoDzsXnnJuQU9Fte0R+Q6qtxn46RbnK\nqpWZfBqUwNX++rvjNUkN+Gxs2Ml/uCYzXXPJCwgyOi/ZfI5JntBMqay3DG/2gC1y\nbupQ064e0scZsxQNaUQuXVzdmX24+oe9uCW6BkiG2wz56w6bvdVz95sBLnA1anVA\nJwYhsR9WcRi5JBVtxWUibjyfOY2Ei19gVuBrHkCAeiR4cE1ebNI68qLvKCeU5XRk\npBn44jYSVfKII0nasIDXhmssdkGExxt+MLmJwqxqQQKBgQDcjteo+jKc3ea0jkcd\nj9GPa1eFTlIgcLu5W2jCDEi3sx8ahkje/TGy5rHlNkcOhhzcGgZbmaIGOBhxoE0v\n3ZmrdXfrZEFTNFEPu3O33km0i91rLArGV7xT+tc0P8P1cKZpjY77E2V3Kd0TMr1b\n+6nNyutrUMNaF+5n375QcJw6LQKBgQDDCuyZfMcTT/raeRWXrdZso8o/TU3sE171\nof67RZgcstBamY28xZFe4QD2ZPBxEG7VitPLka3/nufpqEM1x23JwWenNkX2CYBR\n679mi70lZNrj9JZRyVaOgYWKPdc/5lgh46X8SbES7qfHGt0WtGD5+tEpqjM/8l33\nYgJ2YhABgwKBgBH6Wr3dVw7OT6XcCxPvyycjmsi076DRT5v2RX27vpmqshhZZcs3\nXDu27j0+xV/7spKGVIpW5YwYOnXYmTIToBkHxDSdwW1k0E61+uK77coXtH6t4lr0\nf9dglPYfVHvHKOllrofsttKVyP1tn13GD7tElRf0R1gqpzY0WLD53OIpAoGBAJo4\nTRSgIRkYKJYPIA+rGN0WNZkQGwkL2A4JZU3WnYwzp6O7vuMApQ2MhCJPdf8wqzKW\nbxmLuzVgBKgwr9QaOKlLEBabR35fzOL5sYH4BDtJH/sXLrTEqnhL2beRZl3UWOOT\nCXAPJMB/jJJWn3KQdg2zUSfMuHFbxwkQqjnJGDbZAoGASXm8s1XDe+ZnZ/7q7gnR\n+OKet4C+KGPdZTFAQgpRTGBLbHYsFSVWxiL6dngEELJEK2lS1UE2ycR9Ez5VeUT3\n0LF4tDjKn2+OGuOXVKm8tRjmigXRmDIaLXZBbnW4JWp+HnlLzlVd4h2fIFJK3KAK\nZLBeE5IzlATGdMvQ3hS43KU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "wugblbhzrb@truthtracker.iam.gserviceaccount.com",
+  "client_id": "115317884713141004957",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/wugblbhzrb%40truthtracker.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
