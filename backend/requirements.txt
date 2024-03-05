@@ -10,3 +10,4 @@ Pillow==9.4.0
 requests==2.28.2
 matplotlib
 scikit-learn
+python==3.9.7
