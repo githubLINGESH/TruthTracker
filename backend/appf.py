@@ -868,39 +868,39 @@ def report_user():
             file.write(report_user + '\n')
 
         return "Report submitted successfully."
+    
+    
+# Function to load the HDF5 model directly from URL
+def load_hdf5_model_from_url(url):
+    try:
+        model_path = tf.keras.utils.get_file("mymodel.hdf5", origin=url)
+        model = tf.keras.models.load_model(model_path)
+        return model
+    except HTTPError as e:
+        print(f"Error loading HDF5 model from URL: {e}")
+        return None
+
+# Function to load the Caffe model directly from URL
+def load_caffe_model_from_url(prototxt_url, caffemodel_url):
+    try:
+        prototxt = urllib.request.urlopen(prototxt_url).read().decode('utf-8')
+        caffemodel = urllib.request.urlopen(caffemodel_url).read()
+        prototxt_file = tempfile.NamedTemporaryFile(delete=False)
+        caffemodel_file = tempfile.NamedTemporaryFile(delete=False)
+        prototxt_file.write(prototxt.encode('utf-8'))
+        caffemodel_file.write(caffemodel)
+        prototxt_file.close()
+        caffemodel_file.close()
+        net = cv2.dnn.readNetFromCaffe(prototxt_file.name, caffemodel_file.name)
+        return net
+    except HTTPError as e:
+        print(f"Error loading Caffe model from URL: {e}")
+        return None
 
     
 @app.route('/realcam', methods=['GET','POST'])
 def real_cam():
     if request.method == 'POST':
-        
-        # Function to load the HDF5 model directly from URL
-        def load_hdf5_model_from_url(url):
-            try:
-                model_path = tf.keras.utils.get_file("mymodel.hdf5", origin=url)
-                model = tf.keras.models.load_model(model_path)
-                return model
-            except HTTPError as e:
-                print(f"Error loading HDF5 model from URL: {e}")
-                return None
-
-        # Function to load the Caffe model directly from URL
-        def load_caffe_model_from_url(prototxt_url, caffemodel_url):
-            try:
-                prototxt = urllib.request.urlopen(prototxt_url).read().decode('utf-8')
-                caffemodel = urllib.request.urlopen(caffemodel_url).read()
-                prototxt_file = tempfile.NamedTemporaryFile(delete=False)
-                caffemodel_file = tempfile.NamedTemporaryFile(delete=False)
-                prototxt_file.write(prototxt.encode('utf-8'))
-                caffemodel_file.write(caffemodel)
-                prototxt_file.close()
-                caffemodel_file.close()
-                net = cv2.dnn.readNetFromCaffe(prototxt_file.name, caffemodel_file.name)
-                return net
-            except HTTPError as e:
-                print(f"Error loading Caffe model from URL: {e}")
-                return None
-
 
         # Load HDF5 model directly from URL
         spoof_detection_model = load_hdf5_model_from_url(mymodel_hdf5_url)
